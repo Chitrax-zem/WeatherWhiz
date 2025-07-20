@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: url("vedio.mp4");
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .container {
+            width: 90%;
+            max-width: 470px;
+            background: linear-gradient(135deg, #00feba, #5b548a);
+            color: #fff;
+            margin: 40px auto;
+            padding: 40px 35px;
+            text-align: center;
+            z-index: 1;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+         .video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1; /* Keep video behind other content */
+            transform: translate(-50%, -50%);
+            object-fit: cover; /* Cover the whole screen */
+        }
+
+        .time-date {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .search {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .search input {
+            border: 0;
+            outline: 0;
+            background: #ebfffc;
+            color: #555;
+            padding: 10px 25px;
+            height: 60px;
+            border-radius: 30px;
+            flex: 1;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+
+        .search button {
+            border: 0;
+            outline: 0;
+            background: #ebfffc;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .weather-icon {
+            width: 170px;
+            margin-top: 30px;
+        }
+
+        .weather h1 {
+            font-size: 80px;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        .weather h2 {
+            font-size: 45px;
+            font-weight: 400;
+            margin-top: -10px;
+        }
+
+        .details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-top: 50px;
+        }
+
+        .col {
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        .col img {
+            width: 40px;
+            margin-right: 10px;
+        }
+
+        .humidity, .wind {
+            font-size: 28px;
+            margin-top: -6px;
+        }
+    </style>
+</head>
+<body>
+    <video class="video"autoplay loop muted>
+        <source src="video.mp4" type="video/mp4">
+</video>
+    <div class="container">
+        <div class="time-date" id="timeDate"></div>
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button>🔍</button>
+        </div>
+        <div class="weather">
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" class="weather-icon">
+            <h1 class="temp">22°C</h1>
+            <h2 class="city">New Delhi</h2>
+            <div class="details">
+                <div class="col">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const apiKey = "7216e23bc9926d666d2354ae60e1474a"; 
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+
+        async function checkWeather(city) {
+            const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+            const data = await response.json();
+
+            if(response.status == 404) {
+                alert("City not found!");
+                return;
+            }
+
+            document.querySelector(".city").innerHTML = data.name;
+            document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+            document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+            document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+            weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        }
+
+        searchBtn.addEventListener("click", ()=>{
+            checkWeather(searchBox.value);
+        });
+
+        // Update time and date for Indian Standard Time
+        function updateDateTime() {
+            const options = {
+                timeZone: 'Asia/Kolkata',
+                hour12: true,
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                weekday: 'long'
+            };
+            const indianDateTime = new Date().toLocaleString('en-IN', options);
+            document.getElementById('timeDate').innerHTML = indianDateTime;
+        }
+
+        // Update time every second
+        setInterval(updateDateTime, 1000);
+        updateDateTime(); // Initial call
+        
+        // Initial weather check for New Delhi
+        checkWeather("New Delhi");
+    </script>
+</body>
+</html>
